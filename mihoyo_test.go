@@ -8,23 +8,32 @@ import (
 	"testing"
 )
 
-func TestStarRailWantedRolls(t *testing.T) {
-	warps := 800
-	wantedChars := 7
-	wantedLCs := 1
-	iterations := 100000
+func TestGenshinWantedRolls(t *testing.T) {
+	warps := 300
+	wantedChars := 3
+	wantedWeapons := 1
+	iterations := 1000
 
 	successCount := 0
 	failureCount := 0
+	rateUpCharCount := 0
+	rateUpLCCount := 0
 	standardCharCount := 0
 	standardLCCount := 0
 
 	for i := 0; i < iterations; i++ {
-		result := CalcWantedRolls(warps, wantedChars, wantedLCs, &StarRailCharRoller{}, &StarRailLCRoller{})
+		result := CalcWantedRolls(warps, wantedChars, wantedWeapons, &GenshinCharRoller{
+			MihoyoRoller{
+				CurrSRPity:         50,
+				GuaranteedRateUpSR: true,
+			},
+		}, &GenshinWeaponRoller{})
+		rateUpCharCount += result.RateUpSRCharCount
+		rateUpLCCount += result.RateUpSRWeaponCount
 		standardCharCount += result.StdSRCharCount
-		standardLCCount += result.StdLCSRCount
+		standardLCCount += result.StdSRWeaponCount
 
-		if result.RateUpSRCharCount >= wantedChars && result.RateUpSRLCCount >= wantedLCs {
+		if result.RateUpSRCharCount >= wantedChars && result.RateUpSRWeaponCount >= wantedWeapons {
 			successCount++
 		} else {
 			failureCount++
@@ -33,6 +42,48 @@ func TestStarRailWantedRolls(t *testing.T) {
 
 	log.Println("Success:", successCount, "Failure:", failureCount)
 	log.Printf("Success rate: %.4f%%", float64(successCount)/float64(iterations))
+	log.Printf("Average Rate Up char count: %.4f", float64(rateUpCharCount)/float64(iterations))
+	log.Printf("Average Rate Up LC count: %.4f", float64(rateUpLCCount)/float64(iterations))
+	log.Printf("Average Standard char count: %.4f", float64(standardCharCount)/float64(iterations))
+	log.Printf("Average Standard LC count: %.4f", float64(standardLCCount)/float64(iterations))
+}
+
+func TestStarRailWantedRolls(t *testing.T) {
+	warps := 300
+	wantedChars := 7
+	wantedLCs := 0
+	iterations := 1000
+
+	successCount := 0
+	failureCount := 0
+	rateUpCharCount := 0
+	rateUpLCCount := 0
+	standardCharCount := 0
+	standardLCCount := 0
+
+	for i := 0; i < iterations; i++ {
+		result := CalcWantedRolls(warps, wantedChars, wantedLCs, &StarRailCharRoller{
+			MihoyoRoller{
+				CurrSRPity:         50,
+				GuaranteedRateUpSR: true,
+			},
+		}, &StarRailLCRoller{})
+		rateUpCharCount += result.RateUpSRCharCount
+		rateUpLCCount += result.RateUpSRWeaponCount
+		standardCharCount += result.StdSRCharCount
+		standardLCCount += result.StdSRWeaponCount
+
+		if result.RateUpSRCharCount >= wantedChars && result.RateUpSRWeaponCount >= wantedLCs {
+			successCount++
+		} else {
+			failureCount++
+		}
+	}
+
+	log.Println("Success:", successCount, "Failure:", failureCount)
+	log.Printf("Success rate: %.4f%%", float64(successCount)/float64(iterations))
+	log.Printf("Average Rate Up char count: %.4f", float64(rateUpCharCount)/float64(iterations))
+	log.Printf("Average Rate Up LC count: %.4f", float64(rateUpLCCount)/float64(iterations))
 	log.Printf("Average Standard char count: %.4f", float64(standardCharCount)/float64(iterations))
 	log.Printf("Average Standard LC count: %.4f", float64(standardLCCount)/float64(iterations))
 }
