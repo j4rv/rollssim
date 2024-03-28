@@ -28,12 +28,12 @@ func TestGenshinWantedRolls(t *testing.T) {
 				GuaranteedRateUpSR: true,
 			},
 		}, &GenshinWeaponRoller{})
-		rateUpCharCount += result.RateUpSRCharCount
-		rateUpLCCount += result.RateUpSRWeaponCount
-		standardCharCount += result.StdSRCharCount
-		standardLCCount += result.StdSRWeaponCount
+		rateUpCharCount += result.CharacterBannerRateUpSRCount
+		rateUpLCCount += result.WeaponBannerRateUpSRCount
+		standardCharCount += result.CharacterBannerStdSRCount
+		standardLCCount += result.WeaponBannerStdSRCount
 
-		if result.RateUpSRCharCount >= wantedChars && result.RateUpSRWeaponCount >= wantedWeapons {
+		if result.CharacterBannerRateUpSRCount >= wantedChars && result.WeaponBannerRateUpSRCount >= wantedWeapons {
 			successCount++
 		} else {
 			failureCount++
@@ -68,12 +68,12 @@ func TestStarRailWantedRolls(t *testing.T) {
 				GuaranteedRateUpSR: true,
 			},
 		}, &StarRailLCRoller{})
-		rateUpCharCount += result.RateUpSRCharCount
-		rateUpLCCount += result.RateUpSRWeaponCount
-		standardCharCount += result.StdSRCharCount
-		standardLCCount += result.StdSRWeaponCount
+		rateUpCharCount += result.CharacterBannerRateUpSRCount
+		rateUpLCCount += result.WeaponBannerRateUpSRCount
+		standardCharCount += result.CharacterBannerStdSRCount
+		standardLCCount += result.WeaponBannerStdSRCount
 
-		if result.RateUpSRCharCount >= wantedChars && result.RateUpSRWeaponCount >= wantedLCs {
+		if result.CharacterBannerRateUpSRCount >= wantedChars && result.WeaponBannerRateUpSRCount >= wantedLCs {
 			successCount++
 		} else {
 			failureCount++

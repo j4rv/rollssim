@@ -20,10 +20,10 @@ func (s *MihoyoRoller) roll(srChance, rareChance float64, rateUpSRChance float64
 		s.CurrSRPity = 0
 		if s.GuaranteedRateUpSR || rand.Float64() <= rateUpSRChance {
 			s.GuaranteedRateUpSR = false
-			return Rollable{Name: RateUpSR, Type: RateUpSR, Rarity: 5}
+			return Rollable{Name: SuperRare, Type: SuperRare, Rarity: 5, IsRateUp: true}
 		} else {
 			s.GuaranteedRateUpSR = true
-			return Rollable{Name: RandomString(rateUpSRItems), Type: StandardSR, Rarity: 5}
+			return Rollable{Name: RandomString(rateUpSRItems), Type: SuperRare, Rarity: 5}
 		}
 	}
 
@@ -32,10 +32,10 @@ func (s *MihoyoRoller) roll(srChance, rareChance float64, rateUpSRChance float64
 		s.CurrRarePity = 0
 		if s.GuaranteedRateUpRare || rand.Float64() <= 0.5 {
 			s.GuaranteedRateUpRare = false
-			return Rollable{Name: RandomString(rateUpRareItems), Type: RateUpRare, Rarity: 4}
+			return Rollable{Name: RandomString(rateUpRareItems), Type: Rare, Rarity: 4, IsRateUp: true}
 		} else {
 			s.GuaranteedRateUpRare = true
-			return Rollable{Name: StandardRare, Type: StandardRare, Rarity: 4}
+			return Rollable{Name: Rare, Type: Rare, Rarity: 4}
 		}
 	}
 
@@ -51,7 +51,7 @@ var StandardGenshinSRChars = []string{"Diluc", "Jean", "Qiqi", "Keqing", "Mona",
 func (s *GenshinCharRoller) Roll() Rollable {
 	srChance := 0.006
 	if s.CurrSRPity+1 >= 74 {
-		srChance += 1.0 / (80.0 - 65.0) * float64(s.CurrSRPity+1-73)
+		srChance += 1.0 / (90.0 - 73.0) * float64(s.CurrSRPity+1-73)
 	}
 	rareChance := 0.051
 	if s.CurrRarePity+1 >= 9 {
@@ -86,13 +86,13 @@ func (s *GenshinWeaponRoller) Roll() Rollable {
 		r := rand.Float64()
 		if r <= 0.375 || s.FatePoints >= 2 {
 			s.FatePoints = 0
-			return Rollable{Name: ChosenRateUpSR, Type: RateUpSR, Rarity: 5}
+			return Rollable{Name: ChosenWeapon, Type: SuperRare, Rarity: 5, IsRateUp: true}
 		} else if r <= 0.75 {
 			s.FatePoints += 1
-			return Rollable{Name: NotChosenRateUpSR, Type: RateUpSR, Rarity: 5}
+			return Rollable{Name: NotChosenWeapon, Type: SuperRare, Rarity: 5, IsRateUp: true}
 		} else {
 			s.FatePoints += 1
-			return Rollable{Name: RandomString(StandardGenshinSRWeapons), Type: StandardSR, Rarity: 5}
+			return Rollable{Name: RandomString(StandardGenshinSRWeapons), Type: SuperRare, Rarity: 5}
 		}
 	}
 
@@ -101,10 +101,10 @@ func (s *GenshinWeaponRoller) Roll() Rollable {
 		s.CurrRarePity = 0
 		if s.GuaranteedRateUpRare || rand.Float64() <= 0.5 {
 			s.GuaranteedRateUpRare = false
-			return Rollable{Name: RandomString(FiveRateUpRares), Type: RateUpRare, Rarity: 4}
+			return Rollable{Name: RandomString(FiveRateUpRares), Type: Rare, Rarity: 4, IsRateUp: true}
 		} else {
 			s.GuaranteedRateUpRare = true
-			return Rollable{Name: StandardRare, Type: StandardRare, Rarity: 4}
+			return Rollable{Name: Rare, Type: Rare, Rarity: 4}
 		}
 	}
 
@@ -122,7 +122,7 @@ var StandardStarRailSRChars = []string{"Bailu", "Yanqing", "Clara", "Gepard", "B
 func (s *StarRailCharRoller) Roll() Rollable {
 	srChance := 0.006
 	if s.CurrSRPity+1 >= 74 {
-		srChance += 1.0 / (80.0 - 65.0) * float64(s.CurrSRPity+1-73)
+		srChance += 1.0 / (90.0 - 73.0) * float64(s.CurrSRPity+1-73)
 	}
 	rareChance := 0.051
 	if s.CurrRarePity+1 >= 9 {
