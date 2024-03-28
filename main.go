@@ -36,6 +36,22 @@ type WantedRollsResult struct {
 	WeaponBannerNotChosenRateUpCount int
 }
 
+func (r *WantedRollsResult) Add(r2 WantedRollsResult) {
+	r.CharacterBannerRateUpSRCount += r2.CharacterBannerRateUpSRCount
+	r.CharacterBannerStdSRCount += r2.CharacterBannerStdSRCount
+	r.CharacterBannerRateUpRareCount += r2.CharacterBannerRateUpRareCount
+	r.CharacterBannerStdRareCount += r2.CharacterBannerStdRareCount
+	r.CharacterBannerFodderCount += r2.CharacterBannerFodderCount
+
+	r.WeaponBannerRateUpSRCount += r2.WeaponBannerRateUpSRCount
+	r.WeaponBannerStdSRCount += r2.WeaponBannerStdSRCount
+	r.WeaponBannerRateUpRareCount += r2.WeaponBannerRateUpRareCount
+	r.WeaponBannerStdRareCount += r2.WeaponBannerStdRareCount
+	r.WeaponBannerFodderCount += r2.WeaponBannerFodderCount
+	r.WeaponBannerChosenRateUpCount += r2.WeaponBannerChosenRateUpCount
+	r.WeaponBannerNotChosenRateUpCount += r2.WeaponBannerNotChosenRateUpCount
+}
+
 func CalcWantedRolls(rollCount, wantedCharCount, wantedLCCount int, chars, lcs Roller) WantedRollsResult {
 	result := WantedRollsResult{}
 	for i := 0; i < rollCount; i++ {
@@ -87,5 +103,6 @@ func CalcWantedRolls(rollCount, wantedCharCount, wantedLCCount int, chars, lcs R
 			break
 		}
 	}
+
 	return result
 }
