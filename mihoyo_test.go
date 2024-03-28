@@ -9,9 +9,9 @@ import (
 )
 
 func TestGenshinWantedRolls(t *testing.T) {
-	warps := 300
-	wantedChars := 3
-	wantedWeapons := 1
+	warps := 1000
+	wantedChars := 7
+	wantedWeapons := 5
 	iterations := 1000
 
 	successCount := 0
@@ -24,7 +24,7 @@ func TestGenshinWantedRolls(t *testing.T) {
 	weaponRollCount := 0
 
 	for i := 0; i < iterations; i++ {
-		result := CalcWantedRolls(warps, wantedChars, wantedWeapons, &GenshinCharRoller{
+		result := CalcGenshinWantedRolls(warps, wantedChars, wantedWeapons, &GenshinCharRoller{
 			MihoyoRoller{
 				CurrSRPity:         50,
 				GuaranteedRateUpSR: true,
@@ -68,7 +68,7 @@ func TestStarRailWantedRolls(t *testing.T) {
 	standardLCCount := 0
 
 	for i := 0; i < iterations; i++ {
-		result := CalcWantedRolls(warps, wantedChars, wantedLCs, &StarRailCharRoller{
+		result := CalcGenshinWantedRolls(warps, wantedChars, wantedLCs, &StarRailCharRoller{
 			MihoyoRoller{
 				CurrSRPity:         50,
 				GuaranteedRateUpSR: true,
@@ -132,6 +132,22 @@ func TestStarRailLCRollerRates(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func TestGenshinWeaponRollerRates(t *testing.T) {
+	warps := 1_000_000
+	fiveStarCount := 0
+
+	roller := GenshinWeaponRoller{}
+	for i := 0; i < warps; i++ {
+		rolled := roller.Roll()
+		if rolled.Rarity == 5 {
+			fiveStarCount++
+		}
+	}
+
+	log.Println("Five star LC count:", fiveStarCount)
+	log.Printf("Five star LC consolidated rate: %.5f%%", float64(fiveStarCount*100)/float64(warps))
 }
 
 func TestStarRailRareCharRollerRates(t *testing.T) {

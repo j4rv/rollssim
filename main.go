@@ -56,7 +56,7 @@ func (r *WantedRollsResult) Add(r2 WantedRollsResult) {
 	r.WeaponBannerRollCount += r2.WeaponBannerRollCount
 }
 
-func CalcWantedRolls(rollCount, wantedCharCount, wantedWeaponCount int, chars, lcs Roller) WantedRollsResult {
+func CalcGenshinWantedRolls(rollCount, wantedCharCount, chosenWeaponCount int, chars, lcs Roller) WantedRollsResult {
 	result := WantedRollsResult{}
 	for i := 0; i < rollCount; i++ {
 		if result.CharacterBannerRateUpSRCount < wantedCharCount {
@@ -78,7 +78,7 @@ func CalcWantedRolls(rollCount, wantedCharCount, wantedWeaponCount int, chars, l
 			default:
 				result.CharacterBannerFodderCount++
 			}
-		} else if result.WeaponBannerRateUpSRCount < wantedWeaponCount {
+		} else if result.WeaponBannerChosenRateUpCount < chosenWeaponCount {
 			result.WeaponBannerRollCount++
 			lc := lcs.Roll()
 
