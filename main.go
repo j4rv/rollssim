@@ -26,6 +26,7 @@ type WantedRollsResult struct {
 	CharacterBannerRateUpRareCount int
 	CharacterBannerStdRareCount    int
 	CharacterBannerFodderCount     int
+	CharacterBannerRollCount       int
 
 	WeaponBannerRateUpSRCount        int
 	WeaponBannerStdSRCount           int
@@ -34,6 +35,7 @@ type WantedRollsResult struct {
 	WeaponBannerFodderCount          int
 	WeaponBannerChosenRateUpCount    int
 	WeaponBannerNotChosenRateUpCount int
+	WeaponBannerRollCount            int
 }
 
 func (r *WantedRollsResult) Add(r2 WantedRollsResult) {
@@ -42,6 +44,7 @@ func (r *WantedRollsResult) Add(r2 WantedRollsResult) {
 	r.CharacterBannerRateUpRareCount += r2.CharacterBannerRateUpRareCount
 	r.CharacterBannerStdRareCount += r2.CharacterBannerStdRareCount
 	r.CharacterBannerFodderCount += r2.CharacterBannerFodderCount
+	r.CharacterBannerRollCount += r2.CharacterBannerRollCount
 
 	r.WeaponBannerRateUpSRCount += r2.WeaponBannerRateUpSRCount
 	r.WeaponBannerStdSRCount += r2.WeaponBannerStdSRCount
@@ -50,12 +53,14 @@ func (r *WantedRollsResult) Add(r2 WantedRollsResult) {
 	r.WeaponBannerFodderCount += r2.WeaponBannerFodderCount
 	r.WeaponBannerChosenRateUpCount += r2.WeaponBannerChosenRateUpCount
 	r.WeaponBannerNotChosenRateUpCount += r2.WeaponBannerNotChosenRateUpCount
+	r.WeaponBannerRollCount += r2.WeaponBannerRollCount
 }
 
-func CalcWantedRolls(rollCount, wantedCharCount, wantedLCCount int, chars, lcs Roller) WantedRollsResult {
+func CalcWantedRolls(rollCount, wantedCharCount, wantedWeaponCount int, chars, lcs Roller) WantedRollsResult {
 	result := WantedRollsResult{}
 	for i := 0; i < rollCount; i++ {
 		if result.CharacterBannerRateUpSRCount < wantedCharCount {
+			result.CharacterBannerRollCount++
 			c := chars.Roll()
 			switch c.Type {
 			case SuperRare:
@@ -73,7 +78,8 @@ func CalcWantedRolls(rollCount, wantedCharCount, wantedLCCount int, chars, lcs R
 			default:
 				result.CharacterBannerFodderCount++
 			}
-		} else if result.WeaponBannerRateUpSRCount < wantedLCCount {
+		} else if result.WeaponBannerRateUpSRCount < wantedWeaponCount {
+			result.WeaponBannerRollCount++
 			lc := lcs.Roll()
 
 			switch lc.Type {

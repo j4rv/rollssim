@@ -17,9 +17,11 @@ func TestGenshinWantedRolls(t *testing.T) {
 	successCount := 0
 	failureCount := 0
 	rateUpCharCount := 0
-	rateUpLCCount := 0
+	chosenWeaponCount := 0
+	charRollCount := 0
 	standardCharCount := 0
 	standardLCCount := 0
+	weaponRollCount := 0
 
 	for i := 0; i < iterations; i++ {
 		result := CalcWantedRolls(warps, wantedChars, wantedWeapons, &GenshinCharRoller{
@@ -29,11 +31,13 @@ func TestGenshinWantedRolls(t *testing.T) {
 			},
 		}, &GenshinWeaponRoller{})
 		rateUpCharCount += result.CharacterBannerRateUpSRCount
-		rateUpLCCount += result.WeaponBannerRateUpSRCount
+		chosenWeaponCount += result.WeaponBannerChosenRateUpCount
 		standardCharCount += result.CharacterBannerStdSRCount
 		standardLCCount += result.WeaponBannerStdSRCount
+		charRollCount += result.CharacterBannerRollCount
+		weaponRollCount += result.WeaponBannerRollCount
 
-		if result.CharacterBannerRateUpSRCount >= wantedChars && result.WeaponBannerRateUpSRCount >= wantedWeapons {
+		if result.CharacterBannerRateUpSRCount >= wantedChars && result.WeaponBannerChosenRateUpCount >= wantedWeapons {
 			successCount++
 		} else {
 			failureCount++
@@ -41,11 +45,13 @@ func TestGenshinWantedRolls(t *testing.T) {
 	}
 
 	log.Println("Success:", successCount, "Failure:", failureCount)
-	log.Printf("Success rate: %.4f%%", float64(successCount)/float64(iterations))
+	log.Printf("Success rate: %.4f%%", float64(successCount*100)/float64(iterations))
 	log.Printf("Average Rate Up char count: %.4f", float64(rateUpCharCount)/float64(iterations))
-	log.Printf("Average Rate Up LC count: %.4f", float64(rateUpLCCount)/float64(iterations))
 	log.Printf("Average Standard char count: %.4f", float64(standardCharCount)/float64(iterations))
-	log.Printf("Average Standard LC count: %.4f", float64(standardLCCount)/float64(iterations))
+	log.Printf("Average Character banner roll count: %.4f", float64(charRollCount)/float64(iterations))
+	log.Printf("Average Rate Up Weapon count: %.4f", float64(chosenWeaponCount)/float64(iterations))
+	log.Printf("Average Standard Weapon count: %.4f", float64(standardLCCount)/float64(iterations))
+	log.Printf("Average Weapon banner roll count: %.4f", float64(weaponRollCount)/float64(iterations))
 }
 
 func TestStarRailWantedRolls(t *testing.T) {
