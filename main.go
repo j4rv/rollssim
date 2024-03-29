@@ -56,7 +56,64 @@ func (r *WantedRollsResult) Add(r2 WantedRollsResult) {
 	r.WeaponBannerRollCount += r2.WeaponBannerRollCount
 }
 
-func CalcGenshinWantedRolls(rollCount, wantedCharCount, chosenWeaponCount int, chars, lcs Roller) WantedRollsResult {
+func CalcGenshinWantedRolls(rollCount, wantedCharCount, chosenWeaponCount int, chars *GenshinCharRoller, weapons *GenshinWeaponRoller) WantedRollsResult {
+	result := WantedRollsResult{}
+	for i := 0; i < rollCount; i++ {
+		if result.CharacterBannerRateUpSRCount < wantedCharCount {
+			result.CharacterBannerRollCount++
+			c := chars.Roll()
+			switch c.Type {
+			case SuperRare:
+				if c.IsRateUp {
+					result.CharacterBannerRateUpSRCount++
+				} else {
+					result.CharacterBannerStdSRCount++
+				}
+			case Rare:
+				if c.IsRateUp {
+					result.CharacterBannerRateUpRareCount++
+				} else {
+					result.CharacterBannerStdRareCount++
+				}
+			default:
+				result.CharacterBannerFodderCount++
+			}
+		} else if result.WeaponBannerChosenRateUpCount < chosenWeaponCount {
+			result.WeaponBannerRollCount++
+			lc := weapons.Roll()
+
+			switch lc.Type {
+			case SuperRare:
+				if lc.IsRateUp {
+					result.WeaponBannerRateUpSRCount++
+				} else {
+					result.WeaponBannerStdSRCount++
+				}
+			case Rare:
+				if lc.IsRateUp {
+					result.WeaponBannerRateUpRareCount++
+				} else {
+					result.WeaponBannerStdRareCount++
+				}
+			default:
+				result.WeaponBannerFodderCount++
+			}
+
+			switch lc.Name {
+			case ChosenWeapon:
+				result.WeaponBannerChosenRateUpCount++
+			case NotChosenWeapon:
+				result.WeaponBannerNotChosenRateUpCount++
+			}
+		} else {
+			break
+		}
+	}
+
+	return result
+}
+
+func CalcStarRailWantedRolls(rollCount, wantedCharCount, chosenWeaponCount int, chars *StarRailCharRoller, lcs *StarRailLCRoller) WantedRollsResult {
 	result := WantedRollsResult{}
 	for i := 0; i < rollCount; i++ {
 		if result.CharacterBannerRateUpSRCount < wantedCharCount {
@@ -97,13 +154,6 @@ func CalcGenshinWantedRolls(rollCount, wantedCharCount, chosenWeaponCount int, c
 				}
 			default:
 				result.WeaponBannerFodderCount++
-			}
-
-			switch lc.Name {
-			case ChosenWeapon:
-				result.WeaponBannerChosenRateUpCount++
-			case NotChosenWeapon:
-				result.WeaponBannerNotChosenRateUpCount++
 			}
 		} else {
 			break

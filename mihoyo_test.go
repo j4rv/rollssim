@@ -9,9 +9,9 @@ import (
 )
 
 func TestGenshinWantedRolls(t *testing.T) {
-	warps := 1000
-	wantedChars := 7
-	wantedWeapons := 5
+	warps := 300
+	wantedChars := 3
+	wantedWeapons := 1
 	iterations := 1000
 
 	successCount := 0
@@ -49,15 +49,15 @@ func TestGenshinWantedRolls(t *testing.T) {
 	log.Printf("Average Rate Up char count: %.4f", float64(rateUpCharCount)/float64(iterations))
 	log.Printf("Average Standard char count: %.4f", float64(standardCharCount)/float64(iterations))
 	log.Printf("Average Character banner roll count: %.4f", float64(charRollCount)/float64(iterations))
-	log.Printf("Average Rate Up Weapon count: %.4f", float64(chosenWeaponCount)/float64(iterations))
+	log.Printf("Average Chosen Weapon count: %.4f", float64(chosenWeaponCount)/float64(iterations))
 	log.Printf("Average Standard Weapon count: %.4f", float64(standardLCCount)/float64(iterations))
 	log.Printf("Average Weapon banner roll count: %.4f", float64(weaponRollCount)/float64(iterations))
 }
 
 func TestStarRailWantedRolls(t *testing.T) {
 	warps := 300
-	wantedChars := 7
-	wantedLCs := 0
+	wantedChars := 3
+	wantedLCs := 1
 	iterations := 1000
 
 	successCount := 0
@@ -68,7 +68,7 @@ func TestStarRailWantedRolls(t *testing.T) {
 	standardLCCount := 0
 
 	for i := 0; i < iterations; i++ {
-		result := CalcGenshinWantedRolls(warps, wantedChars, wantedLCs, &StarRailCharRoller{
+		result := CalcStarRailWantedRolls(warps, wantedChars, wantedLCs, &StarRailCharRoller{
 			MihoyoRoller{
 				CurrSRPity:         50,
 				GuaranteedRateUpSR: true,
@@ -95,7 +95,7 @@ func TestStarRailWantedRolls(t *testing.T) {
 }
 
 func TestStarRailCharRollerRates(t *testing.T) {
-	warps := 1_000_000
+	warps := 100_000_000
 	fiveStarCount := 0
 
 	roller := StarRailCharRoller{}
@@ -111,7 +111,7 @@ func TestStarRailCharRollerRates(t *testing.T) {
 }
 
 func TestStarRailLCRollerRates(t *testing.T) {
-	warps := 1_000_000
+	warps := 100_000_000
 	fiveStarCount := 0
 	allNeededRolls := []int{}
 
