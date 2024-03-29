@@ -113,7 +113,7 @@ func CalcGenshinWantedRolls(rollCount, wantedCharCount, chosenWeaponCount int, c
 	return result
 }
 
-func CalcStarRailWantedRolls(rollCount, wantedCharCount, chosenWeaponCount int, chars *StarRailCharRoller, lcs *StarRailLCRoller) WantedRollsResult {
+func CalcStarRailWantedRolls(rollCount, wantedCharCount, rateUpLCCount int, chars *StarRailCharRoller, lcs *StarRailLCRoller) WantedRollsResult {
 	result := WantedRollsResult{}
 	for i := 0; i < rollCount; i++ {
 		if result.CharacterBannerRateUpSRCount < wantedCharCount {
@@ -135,7 +135,7 @@ func CalcStarRailWantedRolls(rollCount, wantedCharCount, chosenWeaponCount int, 
 			default:
 				result.CharacterBannerFodderCount++
 			}
-		} else if result.WeaponBannerChosenRateUpCount < chosenWeaponCount {
+		} else if result.WeaponBannerRateUpSRCount < rateUpLCCount {
 			result.WeaponBannerRollCount++
 			lc := lcs.Roll()
 
