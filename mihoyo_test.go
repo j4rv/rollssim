@@ -1,7 +1,6 @@
 package rollssim
 
 import (
-	"encoding/csv"
 	"fmt"
 	"log"
 	"os"
@@ -9,10 +8,10 @@ import (
 )
 
 func TestGenshinWantedRolls(t *testing.T) {
-	warps := 300
-	wantedChars := 3
-	wantedWeapons := 1
-	iterations := 1000
+	warps := 791 - 9
+	wantedChars := 11
+	wantedWeapons := 0
+	iterations := 100000
 
 	successCount := 0
 	failureCount := 0
@@ -25,10 +24,7 @@ func TestGenshinWantedRolls(t *testing.T) {
 
 	for i := 0; i < iterations; i++ {
 		result := CalcGenshinWantedRolls(warps, wantedChars, wantedWeapons, &GenshinCharRoller{
-			MihoyoRoller{
-				CurrSRPity:         50,
-				GuaranteedRateUpSR: true,
-			},
+			MihoyoRoller{},
 		}, &GenshinWeaponRoller{})
 		rateUpCharCount += result.CharacterBannerRateUpSRCount
 		chosenWeaponCount += result.WeaponBannerChosenRateUpCount
@@ -128,67 +124,72 @@ func TestStarRailLCRollerRates(t *testing.T) {
 	log.Println("Five star LC count:", fiveStarCount)
 	log.Printf("Five star LC consolidated rate: %.5f%%", float64(fiveStarCount)/float64(warps))
 
-	err := makeFile("lc_sr_needed_rolls.csv", allNeededRolls)
+	/*err := makeFile("lc_sr_needed_rolls.csv", allNeededRolls)
+	if err != nil {
+		log.Fatal(err)
+	}*/
+}
+
+func TestGenshinWeaponRollerRates(t *testing.T) {
+	pulls := 1000000
+	fiveStarCount := 0
+	allNeededRolls := []int{}
+	pityToFiveStarCount := make([]int, 80)
+	csv := ""
+
+	roller := GenshinWeaponRoller{}
+	for i := 0; i < pulls; i++ {
+		pityBeforeRolling := roller.CurrSRPity
+		rolled := roller.Roll()
+		if rolled.Rarity == 5 {
+			fiveStarCount++
+			allNeededRolls = append(allNeededRolls, pityBeforeRolling+1)
+		}
+	}
+
+	for _, neededRolls := range allNeededRolls {
+		// index 0 for neededRolls = 1
+		pityToFiveStarCount[neededRolls-1]++
+	}
+
+	for i := 0; i < 80; i++ {
+		csv += fmt.Sprintf("%d	%d\n", i+1, pityToFiveStarCount[i])
+	}
+
+	log.Println("First pull chance:", float64(pityToFiveStarCount[0])/float64(len(allNeededRolls)))
+
+	log.Println("Iteration count:", pulls)
+	log.Println("Five star Weapon count:", fiveStarCount)
+	log.Printf("Five star Weapon consolidated rate: %.5f%%", float64(fiveStarCount*100)/float64(pulls))
+	err := makeFile("genshin_weapon_needed_rolls.csv", csv)
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
-func TestGenshinWeaponRollerRates(t *testing.T) {
-	warps := 1_000_000
-	fiveStarCount := 0
-
-	roller := GenshinWeaponRoller{}
-	for i := 0; i < warps; i++ {
-		rolled := roller.Roll()
-		if rolled.Rarity == 5 {
-			fiveStarCount++
-		}
-	}
-
-	log.Println("Five star LC count:", fiveStarCount)
-	log.Printf("Five star LC consolidated rate: %.5f%%", float64(fiveStarCount*100)/float64(warps))
-}
-
 func TestStarRailRareCharRollerRates(t *testing.T) {
-	warps := 200_000
+	warps := 10000_000
 	rareCount := 0
-	allNeededRolls := []int{}
 
 	roller := StarRailCharRoller{}
 	for i := 0; i < warps; i++ {
-		neededRolls := roller.CurrRarePity + 1
 		char := roller.Roll()
 		if char.Rarity == 4 {
 			rareCount++
-			allNeededRolls = append(allNeededRolls, neededRolls)
 		}
 	}
 
 	log.Println("Rare char count:", rareCount)
 	log.Printf("Rare char consolidated rate: %.5f%%", float64(rareCount)/float64(warps))
-
-	err := makeFile("rare_char_needed_rolls.csv", allNeededRolls)
-	if err != nil {
-		log.Fatal(err)
-	}
 }
 
-func makeFile[T any](filename string, data []T) error {
+func makeFile(filename string, data string) error {
 	f, err := os.Create(filename)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
 
-	w := csv.NewWriter(f)
-	defer w.Flush()
-
-	for _, roll := range data {
-		if err := w.Write([]string{fmt.Sprintf("%v", roll)}); err != nil {
-			return err
-		}
-	}
-
-	return nil
+	_, err = f.WriteString(data)
+	return err
 }
