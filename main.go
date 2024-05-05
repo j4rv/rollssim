@@ -6,8 +6,19 @@ const Fodder = "Fodder"
 const ChosenWeapon = "Chosen Weapon"
 const NotChosenWeapon = "Not Chosen Weapon"
 
-var ThreeRateUpRares = []string{"Rare 1", "Rare 2", "Rare 3"}
-var FiveRateUpRares = []string{"Rare 1", "Rare 2", "Rare 3", "Rare 4", "Rare 5"}
+var ThreeRateUpRares = []Rollable{
+	{Name: "RateUp Rare 1", Type: Rare, Rarity: 4, IsRateUp: true},
+	{Name: "RateUp Rare 2", Type: Rare, Rarity: 4, IsRateUp: true},
+	{Name: "RateUp Rare 3", Type: Rare, Rarity: 4, IsRateUp: true},
+}
+
+var FiveRateUpRares = []Rollable{
+	{Name: "RateUp Rare 1", Type: Rare, Rarity: 4, IsRateUp: true},
+	{Name: "RateUp Rare 2", Type: Rare, Rarity: 4, IsRateUp: true},
+	{Name: "RateUp Rare 3", Type: Rare, Rarity: 4, IsRateUp: true},
+	{Name: "RateUp Rare 4", Type: Rare, Rarity: 4, IsRateUp: true},
+	{Name: "RateUp Rare 5", Type: Rare, Rarity: 4, IsRateUp: true},
+}
 
 type Rollable struct {
 	Name     string

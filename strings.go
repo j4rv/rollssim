@@ -2,10 +2,10 @@ package rollssim
 
 import "math/rand"
 
-func RandomString(strings []string) string {
-	if len(strings) == 0 {
-		return ""
+func RandomRollable(r []Rollable) Rollable {
+	if len(r) == 0 {
+		return Rollable{}
 	}
-	randomIndex := rand.Intn(len(strings))
-	return strings[randomIndex]
+	randomIndex := rand.Intn(len(r))
+	return r[randomIndex]
 }

@@ -18,7 +18,7 @@ type MihoyoRoller struct {
 	GuaranteedRateUpRare bool
 }
 
-func (s *MihoyoRoller) roll(srChance, rareChance float64, rateUpSRChance float64, rateUpSRItems, rateUpRareItems []string) Rollable {
+func (s *MihoyoRoller) roll(srChance, rareChance float64, rateUpSRChance float64, rateUpSRItems, rateUpRareItems []Rollable) Rollable {
 	s.CurrSRPity++
 	s.CurrRarePity++
 
@@ -30,7 +30,7 @@ func (s *MihoyoRoller) roll(srChance, rareChance float64, rateUpSRChance float64
 			return Rollable{Name: SuperRare, Type: SuperRare, Rarity: 5, IsRateUp: true}
 		} else {
 			s.GuaranteedRateUpSR = true
-			return Rollable{Name: RandomString(rateUpSRItems), Type: SuperRare, Rarity: 5}
+			return RandomRollable(rateUpSRItems)
 		}
 	}
 
@@ -39,7 +39,7 @@ func (s *MihoyoRoller) roll(srChance, rareChance float64, rateUpSRChance float64
 		s.CurrRarePity = 0
 		if s.GuaranteedRateUpRare || rand.Float64() <= 0.5 {
 			s.GuaranteedRateUpRare = false
-			return Rollable{Name: RandomString(rateUpRareItems), Type: Rare, Rarity: 4, IsRateUp: true}
+			return RandomRollable(rateUpRareItems)
 		} else {
 			s.GuaranteedRateUpRare = true
 			return Rollable{Name: Rare, Type: Rare, Rarity: 4}
@@ -53,7 +53,9 @@ type GenshinCharRoller struct {
 	MihoyoRoller
 }
 
-var StandardGenshinSRChars = []string{"Diluc", "Jean", "Qiqi", "Keqing", "Mona", "Tighnari", "Dehya"}
+var StandardGenshinSRChars = []Rollable{
+	{Name: "Standard 5*", Type: SuperRare, Rarity: 5, IsRateUp: false},
+}
 
 func (s *GenshinCharRoller) Roll() Rollable {
 	srChance := SR_CHAR_BANNER_BASE_CHANCE
@@ -72,7 +74,9 @@ type GenshinWeaponRoller struct {
 	FatePoints int
 }
 
-var StandardGenshinSRWeapons = []string{"TODO"}
+var StandardGenshinSRWeapons = []Rollable{
+	{Name: "Standard 5*", Type: SuperRare, Rarity: 5, IsRateUp: false},
+}
 
 func (s *GenshinWeaponRoller) Roll() Rollable {
 	s.CurrSRPity++
@@ -99,7 +103,7 @@ func (s *GenshinWeaponRoller) Roll() Rollable {
 			return Rollable{Name: NotChosenWeapon, Type: SuperRare, Rarity: 5, IsRateUp: true}
 		} else {
 			s.FatePoints += 1
-			return Rollable{Name: RandomString(StandardGenshinSRWeapons), Type: SuperRare, Rarity: 5}
+			return RandomRollable(StandardGenshinSRWeapons)
 		}
 	}
 
@@ -108,7 +112,7 @@ func (s *GenshinWeaponRoller) Roll() Rollable {
 		s.CurrRarePity = 0
 		if s.GuaranteedRateUpRare || rand.Float64() <= 0.5 {
 			s.GuaranteedRateUpRare = false
-			return Rollable{Name: RandomString(FiveRateUpRares), Type: Rare, Rarity: 4, IsRateUp: true}
+			return RandomRollable(FiveRateUpRares)
 		} else {
 			s.GuaranteedRateUpRare = true
 			return Rollable{Name: Rare, Type: Rare, Rarity: 4}
@@ -124,7 +128,16 @@ type StarRailCharRoller struct {
 	MihoyoRoller
 }
 
-var StandardStarRailSRChars = []string{"Bailu", "Yanqing", "Clara", "Gepard", "Bronya", "Welt", "Himeko"}
+var StandardStarRailSRChars = []Rollable{
+	{Name: "RateUp 5*", Type: SuperRare, Rarity: 5, IsRateUp: true},
+	{Name: "Standard 5*", Type: SuperRare, Rarity: 5, IsRateUp: false},
+	{Name: "Standard 5*", Type: SuperRare, Rarity: 5, IsRateUp: false},
+	{Name: "Standard 5*", Type: SuperRare, Rarity: 5, IsRateUp: false},
+	{Name: "Standard 5*", Type: SuperRare, Rarity: 5, IsRateUp: false},
+	{Name: "Standard 5*", Type: SuperRare, Rarity: 5, IsRateUp: false},
+	{Name: "Standard 5*", Type: SuperRare, Rarity: 5, IsRateUp: false},
+	{Name: "Standard 5*", Type: SuperRare, Rarity: 5, IsRateUp: false},
+}
 
 func (s *StarRailCharRoller) Roll() Rollable {
 	srChance := SR_CHAR_BANNER_BASE_CHANCE
@@ -135,14 +148,23 @@ func (s *StarRailCharRoller) Roll() Rollable {
 	if s.CurrRarePity+1 >= 9 {
 		rareChance += RARE_CHAR_BANNER_BASE_CHANCE * 10 * float64(s.CurrRarePity+1-8)
 	}
-	return s.MihoyoRoller.roll(srChance, rareChance, 0.5, StandardStarRailSRChars, ThreeRateUpRares)
+	return s.MihoyoRoller.roll(srChance, rareChance, 0.50, StandardStarRailSRChars, ThreeRateUpRares)
 }
 
 type StarRailLCRoller struct {
 	MihoyoRoller
 }
 
-var StandardStarRailSRLCs = []string{"Bailu LC", "Yanqing LC", "Clara LC", "Gepard LC", "Bronya LC", "Welt LC", "Himeko LC"}
+var StandardStarRailSRLCs = []Rollable{
+	{Name: "RateUp 5*", Type: SuperRare, Rarity: 5, IsRateUp: true},
+	{Name: "Standard 5*", Type: SuperRare, Rarity: 5, IsRateUp: false},
+	{Name: "Standard 5*", Type: SuperRare, Rarity: 5, IsRateUp: false},
+	{Name: "Standard 5*", Type: SuperRare, Rarity: 5, IsRateUp: false},
+	{Name: "Standard 5*", Type: SuperRare, Rarity: 5, IsRateUp: false},
+	{Name: "Standard 5*", Type: SuperRare, Rarity: 5, IsRateUp: false},
+	{Name: "Standard 5*", Type: SuperRare, Rarity: 5, IsRateUp: false},
+	{Name: "Standard 5*", Type: SuperRare, Rarity: 5, IsRateUp: false},
+}
 
 func (s *StarRailLCRoller) Roll() Rollable {
 	srChance := SR_LIGHT_CONE_BANNER_BASE_CHANCE
@@ -153,5 +175,5 @@ func (s *StarRailLCRoller) Roll() Rollable {
 	if s.CurrRarePity+1 >= 9 {
 		rareChance += RARE_LIGHT_CONE_BANNER_BASE_CHANCE * 10 * float64(s.CurrRarePity+1-8)
 	}
-	return s.MihoyoRoller.roll(srChance, rareChance, 0.75, StandardStarRailSRLCs, ThreeRateUpRares)
+	return s.MihoyoRoller.roll(srChance, rareChance, 0.78125, StandardStarRailSRLCs, ThreeRateUpRares)
 }
