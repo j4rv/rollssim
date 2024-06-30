@@ -6,6 +6,11 @@ const Fodder = "Fodder"
 const ChosenWeapon = "Chosen Weapon"
 const NotChosenWeapon = "Not Chosen Weapon"
 
+var TwoRateUpRares = []Rollable{
+	{Name: "RateUp Rare 1", Type: Rare, Rarity: 4, IsRateUp: true},
+	{Name: "RateUp Rare 2", Type: Rare, Rarity: 4, IsRateUp: true},
+}
+
 var ThreeRateUpRares = []Rollable{
 	{Name: "RateUp Rare 1", Type: Rare, Rarity: 4, IsRateUp: true},
 	{Name: "RateUp Rare 2", Type: Rare, Rarity: 4, IsRateUp: true},
@@ -29,6 +34,7 @@ type Rollable struct {
 
 type Roller interface {
 	Roll() Rollable
+	Reset()
 }
 
 type WantedRollsResult struct {
@@ -65,6 +71,61 @@ func (r *WantedRollsResult) Add(r2 WantedRollsResult) {
 	r.WeaponBannerChosenRateUpCount += r2.WeaponBannerChosenRateUpCount
 	r.WeaponBannerNotChosenRateUpCount += r2.WeaponBannerNotChosenRateUpCount
 	r.WeaponBannerRollCount += r2.WeaponBannerRollCount
+}
+
+func CalcCharacterBannerRolls(rollCount int, chars Roller) WantedRollsResult {
+	result := WantedRollsResult{}
+	for i := 0; i < rollCount; i++ {
+		c := chars.Roll()
+		switch c.Type {
+		case SuperRare:
+			if c.IsRateUp {
+				result.CharacterBannerRateUpSRCount++
+			} else {
+				result.CharacterBannerStdSRCount++
+			}
+		case Rare:
+			if c.IsRateUp {
+				result.CharacterBannerRateUpRareCount++
+			} else {
+				result.CharacterBannerStdRareCount++
+			}
+		default:
+			result.CharacterBannerFodderCount++
+		}
+	}
+	return result
+}
+
+func CalcWeaponBannerRolls(rollCount int, weapons Roller) WantedRollsResult {
+	result := WantedRollsResult{}
+	for i := 0; i < rollCount; i++ {
+		w := weapons.Roll()
+		switch w.Type {
+		case SuperRare:
+			if w.IsRateUp {
+				result.WeaponBannerRateUpSRCount++
+				// Only for genshin
+				switch w.Name {
+				case ChosenWeapon:
+					result.WeaponBannerChosenRateUpCount++
+				case NotChosenWeapon:
+					result.WeaponBannerNotChosenRateUpCount++
+				}
+			} else {
+				result.WeaponBannerStdSRCount++
+			}
+		case Rare:
+			if w.IsRateUp {
+				result.WeaponBannerRateUpRareCount++
+			} else {
+				result.WeaponBannerStdRareCount++
+			}
+		default:
+			result.WeaponBannerFodderCount++
+		}
+	}
+	return result
 }
 
 func CalcGenshinWantedRolls(rollCount, wantedCharCount, chosenWeaponCount int, chars *GenshinCharRoller, weapons *GenshinWeaponRoller) WantedRollsResult {
@@ -115,6 +176,56 @@ func CalcGenshinWantedRolls(rollCount, wantedCharCount, chosenWeaponCount int, c
 				result.WeaponBannerChosenRateUpCount++
 			case NotChosenWeapon:
 				result.WeaponBannerNotChosenRateUpCount++
+			}
+		} else {
+			break
+		}
+	}
+
+	return result
+}
+
+func CalcZenlessWantedRolls(rollCount, wantedCharCount, wantedWeaponCount int, chars *GenshinCharRoller, weapons *ZenlessEngineRoller) WantedRollsResult {
+	result := WantedRollsResult{}
+	for i := 0; i < rollCount; i++ {
+		if result.CharacterBannerRateUpSRCount < wantedCharCount {
+			result.CharacterBannerRollCount++
+			c := chars.Roll()
+			switch c.Type {
+			case SuperRare:
+				if c.IsRateUp {
+					result.CharacterBannerRateUpSRCount++
+				} else {
+					result.CharacterBannerStdSRCount++
+				}
+			case Rare:
+				if c.IsRateUp {
+					result.CharacterBannerRateUpRareCount++
+				} else {
+					result.CharacterBannerStdRareCount++
+				}
+			default:
+				result.CharacterBannerFodderCount++
+			}
+		} else if result.WeaponBannerRateUpSRCount < wantedWeaponCount {
+			result.WeaponBannerRollCount++
+			lc := weapons.Roll()
+
+			switch lc.Type {
+			case SuperRare:
+				if lc.IsRateUp {
+					result.WeaponBannerRateUpSRCount++
+				} else {
+					result.WeaponBannerStdSRCount++
+				}
+			case Rare:
+				if lc.IsRateUp {
+					result.WeaponBannerRateUpRareCount++
+				} else {
+					result.WeaponBannerStdRareCount++
+				}
+			default:
+				result.WeaponBannerFodderCount++
 			}
 		} else {
 			break

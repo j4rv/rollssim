@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"sort"
+	"strings"
 	"testing"
 )
 
@@ -134,6 +135,36 @@ func TestStarRailLCRollerRates(t *testing.T) {
 	allNeededRolls := []int{}
 
 	roller := StarRailLCRoller{}
+	for i := 0; i < warps; i++ {
+		neededRolls := roller.CurrSRPity + 1
+		char := roller.Roll()
+		if char.Rarity == 5 {
+			fiveStarCount++
+			if char.IsRateUp {
+				rateUpCount++
+			}
+			allNeededRolls = append(allNeededRolls, neededRolls)
+		}
+	}
+
+	log.Println("Five star LC count:", fiveStarCount)
+	log.Println("Rate up count:", rateUpCount)
+	log.Println("Rate up rate:", float64(rateUpCount)/float64(fiveStarCount))
+	log.Printf("Five star LC consolidated rate: %.5f%%", float64(fiveStarCount)/float64(warps))
+
+	/*err := makeFile("lc_sr_needed_rolls.csv", allNeededRolls)
+	if err != nil {
+		log.Fatal(err)
+	}*/
+}
+
+func TestZenlessEngineRollerRates(t *testing.T) {
+	warps := 100_000_0
+	fiveStarCount := 0
+	rateUpCount := 0
+	allNeededRolls := []int{}
+
+	roller := ZenlessEngineRoller{}
 	for i := 0; i < warps; i++ {
 		neededRolls := roller.CurrSRPity + 1
 		char := roller.Roll()
@@ -310,7 +341,7 @@ func TestStarRailLightConeLuckChart(t *testing.T) {
 
 	for refines := 0; refines < 5; refines++ {
 		wantedWeapons := refines + 1
-		maxNeededRolls := wantedWeapons * 78 * 2
+		maxNeededRolls := wantedWeapons * 80 * 2
 		neededRollsPerRefineStopPoint[refines] = make([]int, iterations)
 		for i := 0; i < iterations; i++ {
 			roller := StarRailLCRoller{}
@@ -328,7 +359,40 @@ func TestStarRailLightConeLuckChart(t *testing.T) {
 			csv += fmt.Sprintf("%.1f	%d	%d\n", p, rolls[0], pRolls)
 		}
 	}
+	csv = strings.ReplaceAll(csv, ".", ",")
 	err := makeFile("star_rail_lc_luck_chart.csv", csv)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func TestZenlessEngineLuckChart(t *testing.T) {
+	iterations := 500_000
+	neededRollsPerRefineStopPoint := map[int][]int{}
+	pPoints := []float32{0.1, 0.5, 1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 99, 99.5, 99.9}
+
+	for refines := 0; refines < 5; refines++ {
+		wantedWeapons := refines + 1
+		maxNeededRolls := wantedWeapons * 80 * 2
+		neededRollsPerRefineStopPoint[refines] = make([]int, iterations)
+		for i := 0; i < iterations; i++ {
+			roller := ZenlessEngineRoller{}
+			result := CalcZenlessWantedRolls(maxNeededRolls, 0, wantedWeapons, nil, &roller)
+			neededRollsPerRefineStopPoint[refines][i] = result.WeaponBannerRollCount
+		}
+		sort.Ints(neededRollsPerRefineStopPoint[refines])
+	}
+
+	csv := ""
+	for refines := 0; refines < 5; refines++ {
+		rolls := neededRollsPerRefineStopPoint[refines]
+		for _, p := range pPoints {
+			pRolls := rolls[int(float32(len(rolls))*p/100)]
+			csv += fmt.Sprintf("%.1f	%d	%d\n", p, rolls[0], pRolls)
+		}
+	}
+	csv = strings.ReplaceAll(csv, ".", ",")
+	err := makeFile("zenless_engine_luck_chart.csv", csv)
 	if err != nil {
 		log.Fatal(err)
 	}
