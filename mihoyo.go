@@ -5,7 +5,6 @@ import (
 )
 
 const MIHOYO_CHAR_BANNER_BASE_CHANCE = 0.006
-const MIHOYO_RARE_WEAPON_BANNER_SOFT_PITY = 8
 
 type MihoyoRoller struct {
 	CurrSRPity           int
@@ -21,13 +20,16 @@ func (s *MihoyoRoller) Reset() {
 	s.GuaranteedRateUpRare = false
 }
 
-func (s *MihoyoRoller) roll(srChance, rareChance float64, rateUpSRChance float64, rateUpRareChance float64, rateUpSRItems, rateUpRareItems []Rollable) Rollable {
+func (s *MihoyoRoller) roll(srChance, rareChance, rateUpSRChance, rateUpRareChance, freeGuaranteeChance float64, rateUpSRItems, rateUpRareItems []Rollable) Rollable {
 	s.CurrSRPity++
 	s.CurrRarePity++
 
 	// Check if we get a SR
 	if rand.Float64() <= srChance {
 		s.CurrSRPity = 0
+		if !s.GuaranteedRateUpRare && rand.Float64() <= freeGuaranteeChance {
+			return Rollable{Name: SuperRare, Type: SuperRare, Rarity: 5, IsRateUp: true}
+		}
 		if s.GuaranteedRateUpSR || rand.Float64() <= rateUpSRChance {
 			s.GuaranteedRateUpSR = false
 			return Rollable{Name: SuperRare, Type: SuperRare, Rarity: 5, IsRateUp: true}
@@ -56,11 +58,14 @@ func (s *MihoyoRoller) roll(srChance, rareChance float64, rateUpSRChance float64
 
 const GENSHIN_CHAR_BANNER_SOFT_PITY = 74
 const GENSHIN_CHAR_BANNER_RARE_SOFT_PITY = 9
+const GENSHIN_CHAR_BANNER_FREE_GUARANTEE_CHANCE = 0.100
 const GENSHIN_WEAPON_BANNER_SOFT_PITY = 63
+const GENSHIN_RARE_WEAPON_BANNER_SOFT_PITY = 8
 
 const GENSHIN_CHAR_BANNER_RARE_BASE_CHANCE = 0.051
 const GENSHIN_WEAPON_BANNER_BASE_CHANCE = 0.007
 const GENSHIN_WEAPON_BANNER_RARE_BASE_CHANCE = 0.060
+const GENSHIN_WEAPON_BANNER_FATE_POINTS_NEEDED = 1
 
 type GenshinCharRoller struct {
 	MihoyoRoller
@@ -79,7 +84,7 @@ func (s *GenshinCharRoller) Roll() Rollable {
 	if s.CurrRarePity+1 >= GENSHIN_CHAR_BANNER_RARE_SOFT_PITY {
 		rareChance += GENSHIN_CHAR_BANNER_RARE_BASE_CHANCE * 10 * float64(s.CurrRarePity+1-(GENSHIN_CHAR_BANNER_RARE_SOFT_PITY-1))
 	}
-	return s.MihoyoRoller.roll(srChance, rareChance, 0.5, 0.5, StandardGenshinSRChars, ThreeRateUpRares)
+	return s.MihoyoRoller.roll(srChance, rareChance, 0.5, 0.5, GENSHIN_CHAR_BANNER_FREE_GUARANTEE_CHANCE, StandardGenshinSRChars, ThreeRateUpRares)
 }
 
 type GenshinWeaponRoller struct {
@@ -91,6 +96,7 @@ var StandardGenshinSRWeapons = []Rollable{
 	{Name: "Standard 5*", Type: SuperRare, Rarity: 5, IsRateUp: false},
 }
 
+// Not coded with the generic roller because of the cringe fate point system
 func (s *GenshinWeaponRoller) Roll() Rollable {
 	s.CurrSRPity++
 	s.CurrRarePity++
@@ -100,15 +106,15 @@ func (s *GenshinWeaponRoller) Roll() Rollable {
 		srChance += GENSHIN_WEAPON_BANNER_BASE_CHANCE * 10 * float64(s.CurrSRPity-(GENSHIN_WEAPON_BANNER_SOFT_PITY-1))
 	}
 	rareChance := GENSHIN_WEAPON_BANNER_RARE_BASE_CHANCE
-	if s.CurrRarePity >= MIHOYO_RARE_WEAPON_BANNER_SOFT_PITY {
-		rareChance += GENSHIN_WEAPON_BANNER_RARE_BASE_CHANCE * 10 * float64(s.CurrRarePity-(MIHOYO_RARE_WEAPON_BANNER_SOFT_PITY-1))
+	if s.CurrRarePity >= GENSHIN_RARE_WEAPON_BANNER_SOFT_PITY {
+		rareChance += GENSHIN_WEAPON_BANNER_RARE_BASE_CHANCE * 10 * float64(s.CurrRarePity-(GENSHIN_RARE_WEAPON_BANNER_SOFT_PITY-1))
 	}
 
 	// Check if we get a SR
 	if rand.Float64() <= srChance {
 		s.CurrSRPity = 0
 		r := rand.Float64()
-		if r <= 0.375 || s.FatePoints >= 2 {
+		if r <= 0.375 || s.FatePoints >= GENSHIN_WEAPON_BANNER_FATE_POINTS_NEEDED {
 			s.FatePoints = 0
 			return Rollable{Name: ChosenWeapon, Type: SuperRare, Rarity: 5, IsRateUp: true}
 		} else if r <= 0.75 {
@@ -139,7 +145,7 @@ func (s *GenshinWeaponRoller) Roll() Rollable {
 
 const ZZZ_CHAR_BANNER_SOFT_PITY = 74
 const ZZZ_CHAR_BANNER_RARE_SOFT_PITY = 10
-const ZZZ_ENGINE_SOFT_PITY = 66
+const ZZZ_ENGINE_BANNER_SOFT_PITY = 66
 const ZZZ_ENGINE_BANNER_RARE_SOFT_PITY = 10
 
 const ZZZ_SR_CHAR_BANNER_BASE_CHANCE = 0.006
@@ -164,7 +170,7 @@ func (s *ZenlessCharRoller) Roll() Rollable {
 	if s.CurrRarePity+1 >= ZZZ_CHAR_BANNER_RARE_SOFT_PITY {
 		rareChance += ZZZ_RARE_CHAR_BANNER_BASE_CHANCE * 10 * float64(s.CurrRarePity+1-(ZZZ_CHAR_BANNER_RARE_SOFT_PITY-1))
 	}
-	return s.MihoyoRoller.roll(srChance, rareChance, 0.5, 0.5, StandardZenlessSRChars, ThreeRateUpRares)
+	return s.MihoyoRoller.roll(srChance, rareChance, 0.5, 0.5, 0, StandardZenlessSRChars, ThreeRateUpRares)
 }
 
 type ZenlessEngineRoller struct {
@@ -177,17 +183,22 @@ var StandardZenlessSREngines = []Rollable{
 
 func (s *ZenlessEngineRoller) Roll() Rollable {
 	srChance := ZZZ_SR_ENGINE_BANNER_BASE_CHANCE
-	if s.CurrSRPity+1 >= ZZZ_ENGINE_SOFT_PITY {
-		srChance += ZZZ_SR_ENGINE_BANNER_BASE_CHANCE * 10 * float64(s.CurrSRPity+1-(ZZZ_ENGINE_SOFT_PITY-1))
+	if s.CurrSRPity+1 >= ZZZ_ENGINE_BANNER_SOFT_PITY {
+		srChance += ZZZ_SR_ENGINE_BANNER_BASE_CHANCE * 10 * float64(s.CurrSRPity+1-(ZZZ_ENGINE_BANNER_SOFT_PITY-1))
 	}
 	rareChance := ZZZ_RARE_ENGINE_BANNER_BASE_CHANCE
 	if s.CurrRarePity+1 >= ZZZ_ENGINE_BANNER_RARE_SOFT_PITY {
 		rareChance += ZZZ_RARE_ENGINE_BANNER_BASE_CHANCE * 10 * float64(s.CurrRarePity+1-(ZZZ_ENGINE_BANNER_RARE_SOFT_PITY-1))
 	}
-	return s.MihoyoRoller.roll(srChance, rareChance, 0.75, 0.75, StandardZenlessSREngines, ThreeRateUpRares)
+	return s.MihoyoRoller.roll(srChance, rareChance, 0.75, 0.75, 0, StandardZenlessSREngines, ThreeRateUpRares)
 }
 
 // --- Star Rail ---
+
+const HSR_CHAR_BANNER_SOFT_PITY = 74
+const HSR_CHAR_BANNER_RARE_SOFT_PITY = 9
+const HSR_LIGHT_CONE_BANNER_SOFT_PITY = 66
+const HSR_LIGHT_CONE_BANNER_RARE_PITY = 8
 
 const HSR_RARE_CHAR_BANNER_BASE_CHANCE = 0.051
 const HSR_RARE_LIGHT_CONE_BANNER_BASE_CHANCE = 0.066
@@ -214,10 +225,10 @@ func (s *StarRailCharRoller) Roll() Rollable {
 		srChance += MIHOYO_CHAR_BANNER_BASE_CHANCE * 10 * float64(s.CurrSRPity+1-73)
 	}
 	rareChance := HSR_RARE_CHAR_BANNER_BASE_CHANCE
-	if s.CurrRarePity+1 >= 9 {
-		rareChance += HSR_RARE_CHAR_BANNER_BASE_CHANCE * 10 * float64(s.CurrRarePity+1-8)
+	if s.CurrRarePity+1 >= HSR_CHAR_BANNER_RARE_SOFT_PITY {
+		rareChance += HSR_RARE_CHAR_BANNER_BASE_CHANCE * 10 * float64(s.CurrRarePity+1-(HSR_CHAR_BANNER_RARE_SOFT_PITY-1))
 	}
-	return s.MihoyoRoller.roll(srChance, rareChance, 0.50, 0.5, StandardStarRailSRChars, ThreeRateUpRares)
+	return s.MihoyoRoller.roll(srChance, rareChance, 0.50, 0.5, 0, StandardStarRailSRChars, ThreeRateUpRares)
 }
 
 type StarRailLCRoller struct {
@@ -237,12 +248,12 @@ var StandardStarRailSRLCs = []Rollable{
 
 func (s *StarRailLCRoller) Roll() Rollable {
 	srChance := HSR_SR_LIGHT_CONE_BANNER_BASE_CHANCE
-	if s.CurrSRPity+1 >= 66 {
-		srChance += HSR_SR_LIGHT_CONE_BANNER_BASE_CHANCE * 10 * float64(s.CurrSRPity+1-65)
+	if s.CurrSRPity+1 >= HSR_LIGHT_CONE_BANNER_SOFT_PITY {
+		srChance += HSR_SR_LIGHT_CONE_BANNER_BASE_CHANCE * 10 * float64(s.CurrSRPity+1-(HSR_LIGHT_CONE_BANNER_SOFT_PITY-1))
 	}
 	rareChance := HSR_RARE_LIGHT_CONE_BANNER_BASE_CHANCE
-	if s.CurrRarePity+1 >= MIHOYO_RARE_WEAPON_BANNER_SOFT_PITY {
-		rareChance += HSR_RARE_LIGHT_CONE_BANNER_BASE_CHANCE * 10 * float64(s.CurrRarePity+1-(MIHOYO_RARE_WEAPON_BANNER_SOFT_PITY-1))
+	if s.CurrRarePity+1 >= HSR_LIGHT_CONE_BANNER_RARE_PITY {
+		rareChance += HSR_RARE_LIGHT_CONE_BANNER_BASE_CHANCE * 10 * float64(s.CurrRarePity+1-(HSR_LIGHT_CONE_BANNER_RARE_PITY-1))
 	}
-	return s.MihoyoRoller.roll(srChance, rareChance, 0.75, 0.75, StandardStarRailSRLCs, ThreeRateUpRares)
+	return s.MihoyoRoller.roll(srChance, rareChance, 0.75, 0.75, 0, StandardStarRailSRLCs, ThreeRateUpRares)
 }
