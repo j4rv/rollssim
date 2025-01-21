@@ -28,11 +28,11 @@ func (s *MihoyoRoller) roll(srChance, rareChance, rateUpSRChance, rateUpRareChan
 	if rand.Float64() <= srChance {
 		s.CurrSRPity = 0
 		if !s.GuaranteedRateUpRare && rand.Float64() <= freeGuaranteeChance {
-			return Rollable{Name: SuperRare, Type: SuperRare, Rarity: 5, IsRateUp: true}
+			return Rollable{Tag: SuperRare, Type: SuperRare, Rarity: 5, IsRateUp: true}
 		}
 		if s.GuaranteedRateUpSR || rand.Float64() <= rateUpSRChance {
 			s.GuaranteedRateUpSR = false
-			return Rollable{Name: SuperRare, Type: SuperRare, Rarity: 5, IsRateUp: true}
+			return Rollable{Tag: SuperRare, Type: SuperRare, Rarity: 5, IsRateUp: true}
 		} else {
 			s.GuaranteedRateUpSR = true
 			return RandomRollable(rateUpSRItems)
@@ -47,11 +47,11 @@ func (s *MihoyoRoller) roll(srChance, rareChance, rateUpSRChance, rateUpRareChan
 			return RandomRollable(rateUpRareItems)
 		} else {
 			s.GuaranteedRateUpRare = true
-			return Rollable{Name: Rare, Type: Rare, Rarity: 4}
+			return Rollable{Tag: Rare, Type: Rare, Rarity: 4}
 		}
 	}
 
-	return Rollable{Name: Fodder, Type: Fodder, Rarity: 3}
+	return Rollable{Tag: Fodder, Type: Fodder, Rarity: 3}
 }
 
 // --- Genshin ---
@@ -72,7 +72,7 @@ type GenshinCharRoller struct {
 }
 
 var StandardGenshinSRChars = []Rollable{
-	{Name: "Standard 5*", Type: SuperRare, Rarity: 5, IsRateUp: false},
+	{Tag: "Standard 5*", Type: SuperRare, Rarity: 5, IsRateUp: false},
 }
 
 func (s *GenshinCharRoller) Roll() Rollable {
@@ -93,7 +93,7 @@ type GenshinWeaponRoller struct {
 }
 
 var StandardGenshinSRWeapons = []Rollable{
-	{Name: "Standard 5*", Type: SuperRare, Rarity: 5, IsRateUp: false},
+	{Tag: "Standard 5*", Type: SuperRare, Rarity: 5, IsRateUp: false},
 }
 
 // Not coded with the generic roller because of the cringe fate point system
@@ -113,15 +113,32 @@ func (s *GenshinWeaponRoller) Roll() Rollable {
 	// Check if we get a SR
 	if rand.Float64() <= srChance {
 		s.CurrSRPity = 0
-		r := rand.Float64()
-		if r <= 0.375 || s.FatePoints >= GENSHIN_WEAPON_BANNER_FATE_POINTS_NEEDED {
+
+		if s.FatePoints >= GENSHIN_WEAPON_BANNER_FATE_POINTS_NEEDED {
 			s.FatePoints = 0
-			return Rollable{Name: ChosenWeapon, Type: SuperRare, Rarity: 5, IsRateUp: true}
-		} else if r <= 0.75 {
+			s.GuaranteedRateUpSR = false
+			return Rollable{Tag: ChosenWeapon, Type: SuperRare, Rarity: 5, IsRateUp: true}
+		}
+
+		r := rand.Float64()
+		chanceLimitedWeaponSelected := 0.375
+		chanceLimitedWeaponNotSelected := 0.375
+		if s.GuaranteedRateUpSR {
+			chanceLimitedWeaponSelected = 0.5
+			chanceLimitedWeaponNotSelected = 0.5
+		}
+
+		if r <= chanceLimitedWeaponSelected {
+			s.FatePoints = 0
+			s.GuaranteedRateUpSR = false
+			return Rollable{Tag: ChosenWeapon, Type: SuperRare, Rarity: 5, IsRateUp: true}
+		} else if r <= chanceLimitedWeaponSelected+chanceLimitedWeaponNotSelected {
 			s.FatePoints += 1
-			return Rollable{Name: NotChosenWeapon, Type: SuperRare, Rarity: 5, IsRateUp: true}
+			s.GuaranteedRateUpSR = false
+			return Rollable{Tag: NotChosenWeapon, Type: SuperRare, Rarity: 5, IsRateUp: true}
 		} else {
 			s.FatePoints += 1
+			s.GuaranteedRateUpSR = true
 			return RandomRollable(StandardGenshinSRWeapons)
 		}
 	}
@@ -134,11 +151,11 @@ func (s *GenshinWeaponRoller) Roll() Rollable {
 			return RandomRollable(FiveRateUpRares)
 		} else {
 			s.GuaranteedRateUpRare = true
-			return Rollable{Name: Rare, Type: Rare, Rarity: 4}
+			return Rollable{Tag: Rare, Type: Rare, Rarity: 4}
 		}
 	}
 
-	return Rollable{Name: Fodder, Type: Fodder, Rarity: 3}
+	return Rollable{Tag: Fodder, Type: Fodder, Rarity: 3}
 }
 
 // --- Zenless Zone Zero ---
@@ -158,7 +175,7 @@ type ZenlessCharRoller struct {
 }
 
 var StandardZenlessSRChars = []Rollable{
-	{Name: "Standard 5*", Type: SuperRare, Rarity: 5, IsRateUp: false},
+	{Tag: "Standard 5*", Type: SuperRare, Rarity: 5, IsRateUp: false},
 }
 
 func (s *ZenlessCharRoller) Roll() Rollable {
@@ -178,7 +195,7 @@ type ZenlessEngineRoller struct {
 }
 
 var StandardZenlessSREngines = []Rollable{
-	{Name: "Standard 5*", Type: SuperRare, Rarity: 5, IsRateUp: false},
+	{Tag: "Standard 5*", Type: SuperRare, Rarity: 5, IsRateUp: false},
 }
 
 func (s *ZenlessEngineRoller) Roll() Rollable {
@@ -209,14 +226,14 @@ type StarRailCharRoller struct {
 }
 
 var StandardStarRailSRChars = []Rollable{
-	{Name: "RateUp 5*", Type: SuperRare, Rarity: 5, IsRateUp: true},
-	{Name: "Standard 5*", Type: SuperRare, Rarity: 5, IsRateUp: false},
-	{Name: "Standard 5*", Type: SuperRare, Rarity: 5, IsRateUp: false},
-	{Name: "Standard 5*", Type: SuperRare, Rarity: 5, IsRateUp: false},
-	{Name: "Standard 5*", Type: SuperRare, Rarity: 5, IsRateUp: false},
-	{Name: "Standard 5*", Type: SuperRare, Rarity: 5, IsRateUp: false},
-	{Name: "Standard 5*", Type: SuperRare, Rarity: 5, IsRateUp: false},
-	{Name: "Standard 5*", Type: SuperRare, Rarity: 5, IsRateUp: false},
+	{Tag: "RateUp 5*", Type: SuperRare, Rarity: 5, IsRateUp: true},
+	{Tag: "Standard 5*", Type: SuperRare, Rarity: 5, IsRateUp: false},
+	{Tag: "Standard 5*", Type: SuperRare, Rarity: 5, IsRateUp: false},
+	{Tag: "Standard 5*", Type: SuperRare, Rarity: 5, IsRateUp: false},
+	{Tag: "Standard 5*", Type: SuperRare, Rarity: 5, IsRateUp: false},
+	{Tag: "Standard 5*", Type: SuperRare, Rarity: 5, IsRateUp: false},
+	{Tag: "Standard 5*", Type: SuperRare, Rarity: 5, IsRateUp: false},
+	{Tag: "Standard 5*", Type: SuperRare, Rarity: 5, IsRateUp: false},
 }
 
 func (s *StarRailCharRoller) Roll() Rollable {
@@ -236,14 +253,14 @@ type StarRailLCRoller struct {
 }
 
 var StandardStarRailSRLCs = []Rollable{
-	{Name: "RateUp 5*", Type: SuperRare, Rarity: 5, IsRateUp: true},
-	{Name: "Standard 5*", Type: SuperRare, Rarity: 5, IsRateUp: false},
-	{Name: "Standard 5*", Type: SuperRare, Rarity: 5, IsRateUp: false},
-	{Name: "Standard 5*", Type: SuperRare, Rarity: 5, IsRateUp: false},
-	{Name: "Standard 5*", Type: SuperRare, Rarity: 5, IsRateUp: false},
-	{Name: "Standard 5*", Type: SuperRare, Rarity: 5, IsRateUp: false},
-	{Name: "Standard 5*", Type: SuperRare, Rarity: 5, IsRateUp: false},
-	{Name: "Standard 5*", Type: SuperRare, Rarity: 5, IsRateUp: false},
+	{Tag: "RateUp 5*", Type: SuperRare, Rarity: 5, IsRateUp: true},
+	{Tag: "Standard 5*", Type: SuperRare, Rarity: 5, IsRateUp: false},
+	{Tag: "Standard 5*", Type: SuperRare, Rarity: 5, IsRateUp: false},
+	{Tag: "Standard 5*", Type: SuperRare, Rarity: 5, IsRateUp: false},
+	{Tag: "Standard 5*", Type: SuperRare, Rarity: 5, IsRateUp: false},
+	{Tag: "Standard 5*", Type: SuperRare, Rarity: 5, IsRateUp: false},
+	{Tag: "Standard 5*", Type: SuperRare, Rarity: 5, IsRateUp: false},
+	{Tag: "Standard 5*", Type: SuperRare, Rarity: 5, IsRateUp: false},
 }
 
 func (s *StarRailLCRoller) Roll() Rollable {

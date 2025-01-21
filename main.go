@@ -7,26 +7,26 @@ const ChosenWeapon = "Chosen Weapon"
 const NotChosenWeapon = "Not Chosen Weapon"
 
 var TwoRateUpRares = []Rollable{
-	{Name: "RateUp Rare 1", Type: Rare, Rarity: 4, IsRateUp: true},
-	{Name: "RateUp Rare 2", Type: Rare, Rarity: 4, IsRateUp: true},
+	{Tag: "RateUp Rare 1", Type: Rare, Rarity: 4, IsRateUp: true},
+	{Tag: "RateUp Rare 2", Type: Rare, Rarity: 4, IsRateUp: true},
 }
 
 var ThreeRateUpRares = []Rollable{
-	{Name: "RateUp Rare 1", Type: Rare, Rarity: 4, IsRateUp: true},
-	{Name: "RateUp Rare 2", Type: Rare, Rarity: 4, IsRateUp: true},
-	{Name: "RateUp Rare 3", Type: Rare, Rarity: 4, IsRateUp: true},
+	{Tag: "RateUp Rare 1", Type: Rare, Rarity: 4, IsRateUp: true},
+	{Tag: "RateUp Rare 2", Type: Rare, Rarity: 4, IsRateUp: true},
+	{Tag: "RateUp Rare 3", Type: Rare, Rarity: 4, IsRateUp: true},
 }
 
 var FiveRateUpRares = []Rollable{
-	{Name: "RateUp Rare 1", Type: Rare, Rarity: 4, IsRateUp: true},
-	{Name: "RateUp Rare 2", Type: Rare, Rarity: 4, IsRateUp: true},
-	{Name: "RateUp Rare 3", Type: Rare, Rarity: 4, IsRateUp: true},
-	{Name: "RateUp Rare 4", Type: Rare, Rarity: 4, IsRateUp: true},
-	{Name: "RateUp Rare 5", Type: Rare, Rarity: 4, IsRateUp: true},
+	{Tag: "RateUp Rare 1", Type: Rare, Rarity: 4, IsRateUp: true},
+	{Tag: "RateUp Rare 2", Type: Rare, Rarity: 4, IsRateUp: true},
+	{Tag: "RateUp Rare 3", Type: Rare, Rarity: 4, IsRateUp: true},
+	{Tag: "RateUp Rare 4", Type: Rare, Rarity: 4, IsRateUp: true},
+	{Tag: "RateUp Rare 5", Type: Rare, Rarity: 4, IsRateUp: true},
 }
 
 type Rollable struct {
-	Name     string
+	Tag      string
 	Type     string
 	Rarity   int
 	IsRateUp bool
@@ -106,7 +106,7 @@ func CalcWeaponBannerRolls(rollCount int, weapons Roller) WantedRollsResult {
 			if w.IsRateUp {
 				result.WeaponBannerRateUpSRCount++
 				// Only for genshin
-				switch w.Name {
+				switch w.Tag {
 				case ChosenWeapon:
 					result.WeaponBannerChosenRateUpCount++
 				case NotChosenWeapon:
@@ -171,7 +171,7 @@ func CalcGenshinWantedRolls(rollCount, wantedCharCount, chosenWeaponCount int, c
 				result.WeaponBannerFodderCount++
 			}
 
-			switch lc.Name {
+			switch lc.Tag {
 			case ChosenWeapon:
 				result.WeaponBannerChosenRateUpCount++
 			case NotChosenWeapon:
