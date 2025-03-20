@@ -284,3 +284,33 @@ func CalcStarRailWantedRolls(rollCount, wantedCharCount, rateUpLCCount int, char
 
 	return result
 }
+
+func CalcReverseWantedRolls(rollCount, wantedCharCount int, chars *ReverseCharRoller) WantedRollsResult {
+	result := WantedRollsResult{}
+	for i := 0; i < rollCount; i++ {
+		if result.CharacterBannerRateUpSRCount < wantedCharCount {
+			result.CharacterBannerRollCount++
+			c := chars.Roll()
+			switch c.Type {
+			case SuperRare:
+				if c.IsRateUp {
+					result.CharacterBannerRateUpSRCount++
+				} else {
+					result.CharacterBannerStdSRCount++
+				}
+			case Rare:
+				if c.IsRateUp {
+					result.CharacterBannerRateUpRareCount++
+				} else {
+					result.CharacterBannerStdRareCount++
+				}
+			default:
+				result.CharacterBannerFodderCount++
+			}
+		} else {
+			break
+		}
+	}
+
+	return result
+}

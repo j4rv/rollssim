@@ -266,6 +266,7 @@ func TestGenshinCharLuckChart(t *testing.T) {
 			csv += fmt.Sprintf("%.1f	%d	%d\n", p, rolls[0], pRolls)
 		}
 	}
+	csv = strings.ReplaceAll(csv, ".", ",")
 	err := makeFile("genshin_char_luck_chart.csv", csv)
 	if err != nil {
 		log.Fatal(err)
@@ -297,6 +298,7 @@ func TestStarRailCharLuckChart(t *testing.T) {
 			csv += fmt.Sprintf("%.1f	%d	%d\n", p, rolls[0], pRolls)
 		}
 	}
+	csv = strings.ReplaceAll(csv, ".", ",")
 	err := makeFile("star_rail_char_luck_chart.csv", csv)
 	if err != nil {
 		log.Fatal(err)
@@ -328,6 +330,7 @@ func TestGenshinWeaponLuckChart(t *testing.T) {
 			csv += fmt.Sprintf("%.1f	%d	%d\n", p, rolls[0], pRolls)
 		}
 	}
+	csv = strings.ReplaceAll(csv, ".", ",")
 	err := makeFile("genshin_weapon_luck_chart.csv", csv)
 	if err != nil {
 		log.Fatal(err)
